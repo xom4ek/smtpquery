@@ -1,0 +1,8 @@
+smtp:
+  host: 127.0.0.1
+  port: 25
+  username: username@example.com
+  password: p@ssw0rd
+rabbit:
+  host: 127.0.0.1
+  port: 5672
