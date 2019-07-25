@@ -3,12 +3,12 @@ import pika
 import logging
 import aiosmtpwrapper
 import time
-from classes import cfg
+from message import cfg
 
 logging.basicConfig(filename="sample.log", level=logging.DEBUG)
 
 connection = pika.BlockingConnection(pika.ConnectionParameters(
-               cfg.rabbit['host'],cfg.rabbit['port'])
+               cfg.rabbit['host'],cfg.rabbit['port']))
 channel = connection.channel()
 channel.queue_declare(queue='tasks',durable=True)
 

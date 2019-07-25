@@ -1,7 +1,7 @@
 import asyncio
 import time
 import aiosmtplib
-from classes import cfg, Email
+from message import cfg, Email
 
 def create_tasks(trs: list,fun):
     tasks=[]
@@ -51,7 +51,8 @@ class SMTP:
         return result
 
     def __del__(self):
-        self.smtp.close()
+        pass
+        #self.smtp.close()
 
 
 async def smtpConnect(cfg,messages):
@@ -70,15 +71,16 @@ async def main(cfg,messages,threads=3):
     for threadTask in threadTasks:
         await threadTask
 
-messages = []
-for i in range(0,25):
-        body = '<p><br>Privet Тут и русский есть?Б<br>ya uje %sый<br>%s</p>' % (
-            i, time.ctime())
-        message = Email(**cfg.send, body=body,
-                        subject="Test from aiosmtp %s" % i)
-        messages.append(message)
-start = time.time()
-asyncio.run(main(cfg,messages,5))
+if __name__ == "__main__":
+    messages = []
+    for i in range(0,25):
+            body = '<p><br>Privet Тут и русский есть?Б<br>ya uje %sый<br>%s</p>' % (
+                i, time.ctime())
+            message = Email(**cfg.send, body=body,
+                            subject="Test from aiosmtp %s" % i)
+            messages.append(message)
+    start = time.time()
+    asyncio.run(main(cfg,messages,5))
 #print(tic())
 #print(200/float(tic()))
 
