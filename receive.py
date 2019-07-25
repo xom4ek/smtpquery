@@ -9,15 +9,11 @@ i = 1
 connection = pika.BlockingConnection(pika.ConnectionParameters(
                cfg.rabbit['host'],cfg.rabbit['port']))
 channel = connection.channel()
-channel.queue_declare(queue='tasks',durable=True)
-import time
-from pprint import pprint
+channel.queue_declare(cfg.rabbit['queue'],durable=True)
 
 def callback(ch, method, properties, body):
-    global i
     body=Struct(**json.loads(body.decode("utf-8")))
     ch.basic_ack(delivery_tag=method.delivery_tag)
-    i=i+1
     message=Email(to=body.to,
                     From=cfg.smtp['username'],
                     body=body.body,

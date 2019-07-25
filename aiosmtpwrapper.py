@@ -9,9 +9,9 @@ class SMTPError(Exception):
 
 class SMTP:
 
-    def __init__(self, hostname, port, username, password, use_tls=False):
+    def __init__(self, hostname, port, username, password, use_tls=True):
+        self.loop = asyncio.get_event_loop()
         try:
-            self.loop = asyncio.get_event_loop()
             self.smtp = aiosmtplib.SMTP(hostname=hostname, port=port, loop=self.loop , use_tls=use_tls)
             self.loop.run_until_complete(self.smtp.connect())
             self.loop.run_until_complete(self.smtp._ehlo_or_helo_if_needed())
@@ -20,17 +20,19 @@ class SMTP:
             print(e.__str__())
 
     def send(self, messages: list):
+        self.tasks=[]
         for message in messages:
+            self.tasks.append(self.loop.create_task(self.smtp.send_message(message)))
             try:
-                result = self.loop.run_until_complete(self.smtp.send_message(message))
-
+                result = self.loop.run_until_complete(self.tasks)
+                print('message send')
             except (aiosmtplib.SMTPRecipientsRefused) as e:
                 print(e.__str__())
             except (TypeError):
-                pass
+                print(e.__str__())
             except Exception as e:
                 print(e.__str__())
-            return result
+        return result
             
     def __del__(self):
         try:
@@ -43,11 +45,12 @@ if __name__ == "__main__":
     from email.mime.multipart import MIMEMultipart
     from email.mime.text import MIMEText
     import time
-    from classes import cfg
-    message = MIMEMultipart()
-    message['Subject'] = 'Testivuu privet'
-    message['From'] =  cfg.smtp['username']
-    message['To'] = cfg.smtp['username']
-    msghtml = MIMEText('<p><b>Privet!!<br>%s</p>' % time.ctime(), 'html')
-    message.attach(msghtml)
-    print(SMTP(cfg.smtp['host'],cfg.smtp['port'],cfg.smtp['username'],cfg.smtp['password'],True).send([message,]))
+    from classes import cfg, Email
+    messages=[]
+    for i in range(0,5):
+        body = '<p><br>Privet Тут и русский есть?Б<br>ya uje %sый<br>%s</p>' % (i,time.ctime())
+        message = Email(to=cfg.smtp['username'],From=cfg.smtp['username'],body=body,subject="Test from aiosmtp %s" % i)
+        messages.append(message)
+    print(messages)
+    test = SMTP(cfg.smtp['host'],cfg.smtp['port'],cfg.smtp['username'],cfg.smtp['password'],use_tls=True).send(messages)
+    print(test)
