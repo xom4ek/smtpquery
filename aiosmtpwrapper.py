@@ -34,7 +34,7 @@ class SMTP:
 
     async def connect(self):
         #Connect to smtp
-        res = await self.smtp.connect()
+        res = await self.smtp.connect(timeout=10)
         print(res)
         res = await self.smtp._ehlo_or_helo_if_needed()
         print(res)
@@ -48,6 +48,8 @@ class SMTP:
         for task in create_tasks(messages, self.smtp.send_message):
             res = await task
             result.append(res)
+            if len(result) < 1:
+                result =  Exception
         return result
 
     def __del__(self):

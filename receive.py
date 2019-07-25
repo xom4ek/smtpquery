@@ -14,7 +14,7 @@ async def connectEstablish(cfg,smtp=smtp):
     print(res)
 loop = asyncio.get_event_loop()
 loop.run_until_complete(connectEstablish(cfg))
-print('start broker')
+
 connection = pika.BlockingConnection(pika.ConnectionParameters(
                **cfg.rabbit))
 channel = connection.channel()
@@ -27,12 +27,22 @@ def callback(ch, method, properties, body,loop=loop,smtp=smtp):
                     From=cfg.smtp['username'],
                     body=body.body,
                     subject=body.subject)
-    loop.run_until_complete(smtp.sending([message,]))
-    return 1
-
+    try:
+        asyncio.gather()
+        res = loop.run_until_complete(smtp.sending([message,]))
+        print(res)
+    except Exception as e:
+        print(e.__str__())
+        loop.run_until_complete(connectEstablish(cfg))
+        res = loop.run_until_complete(smtp.sending([message,]))
+        print(res)
 
 channel.basic_consume(queue='tasks',
                       on_message_callback=callback)
 channel.basic_qos(prefetch_count=1)
+
+
+
+
 print('Start recives emails')
 channel.start_consuming()

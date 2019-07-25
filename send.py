@@ -17,7 +17,7 @@ import sys
 
 
 while True:
-    time.sleep(10)
+    time.sleep(3)
     message = '{ "body":"Сейчас %s  <br>Удивительно!", "to":"%s", "subject":"Тестовая тема"}' % (time.ctime(),cfg.smtp['username'])
     channel.basic_publish(exchange='',
                         routing_key='tasks',
