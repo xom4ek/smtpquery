@@ -49,21 +49,28 @@ class Consumer(object):
 
     def callback(self,ch, method, props, body):
         LOGGER.info('Start callback at message')
-        message = Struct(**json.loads(body.decode("utf-8")))
+        print('DECODE____')
+        message = json.loads(body.decode("utf-8"))
+        #message = Struct(**body.decode("utf-8"))
         LOGGER.info('Message get %s' % message)
-
+        print(message)
+        print(message['to'],message['From'],message['body'])
         # SEND EMAIL OFC
-        self.smtp,self.result = self.smtp.send_email(Email(
-        to=message.to,
-        From=message.From,
-        body=Template(message.body).render(body),
-        subject=message.subject))
+        try:
+            self.smtp,self.result = self.smtp.send_email(Email(
+            to=message['to'],
+            From=message['From'],
+            body=message['body'],
+            subject=message['subject']))
+        except Exception as e:
+            LOGGER.error(e)
+            raise Exception
         # END SEND EMAIL OFC
-
+        LOGGER.info('Success sending message')
 
         LOGGER.info('Result %s' % self.result)
         if self.result == {}:
-            response = """{'%s': (250,'Success sending')}""" % message.to
+            response = """{'%s': (250,'Success sending')}""" % message['to']
         else:
             response = self.result
         LOGGER.info('Message send %s' % message)
@@ -92,7 +99,7 @@ if __name__ == "__main__":
     from pprint import pprint
     LOGGER = logging.getLogger(__name__)
     LOG_FORMAT = ("{'time':'%(asctime)s', 'name': '%(name)s', 'level': '%(levelname)s', 'message': '%(message)s'}")
-    logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
+    logging.basicConfig(level=logging.ERROR, format=LOG_FORMAT)
     conn=Consumer(url='amqp://guest:guest@localhost:5672/%2F',queue='test')
     conn.create_conn()
     conn.reconnect()
