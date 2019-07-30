@@ -54,7 +54,7 @@ class EmailRpcClient(object):
             )
         while self.response is None:
             self.connection.process_data_events()
-        return str(self.response)
+        return json.loads(self.response)
 
 
 
@@ -63,4 +63,13 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
     LOGGER.info('Start sending')
     email_rpc = EmailRpcClient("""amqp://guest:guest@localhost:5672/%2f""",'test')
-    LOGGER.info(email_rpc.sendTemplate(body=str('<p>Privet from RabbitMQ</p>'),to='xom4ek-1994@yandex.ru',From='xom4ek-1994@yandex.ru',subject='Привет тема',template='./templates/template.html.j2'))
+    msg={
+    'body':str('<p>Privet from client {{ privet }}</p>'),
+    'to':'xom4ek-1994@yandex.ru',
+    'From':'xom4ek-1994@yandex.ru',
+    'subject':'Привет из клиента',
+    'template':'./templates/template.html.j2',
+    'privet':'from client AGA',
+    'emailbody':'Спасибо за то что ты с нами!<br>Будь счастлив!'
+    }
+    LOGGER.info(email_rpc.sendTemplate(**msg))

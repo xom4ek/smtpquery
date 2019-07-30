@@ -5,6 +5,8 @@ from email.mime.text import MIMEText
 import time
 import logging
 
+LOGGER = logging.getLogger(__name__)
+
 class Email(MIMEMultipart):
     def __init__(self,to,From,body,subject,*args,**kwargs):
         super().__init__(*args,**kwargs)
@@ -23,7 +25,7 @@ def Get_config(config):
         return Struct(**yaml.safe_load(f))
 
 cfg=Get_config('config.yml')
-LOGGER = logging.getLogger(__name__)
+
 
 
 class SMTPe():
@@ -69,7 +71,7 @@ class SMTPe():
         try:
             log = self.conn.login(self.username,self.password)
             LOGGER.info(log)
-        except Exception:
+        except Exception as e:
             self.try_cnt=self.try_cnt+1
             LOGGER.info('Try_cnt %s' % self.try_cnt)
             try_delay = self.get_delay()
@@ -78,7 +80,7 @@ class SMTPe():
             if self.try_cnt < self.try_max:
                 self.create_conn()
             else:
-                LOGGER.info('Exception here')
+                LOGGER.error(e)
                 return Exception
         return self.conn
 

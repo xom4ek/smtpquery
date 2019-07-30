@@ -43,41 +43,40 @@ class Consumer(object):
             if self.try_cnt < self.try_max:
                 self.create_conn()
             else:
-                LOGGER.info('Exception here')
+                LOGGER.error(e)
                 raise Exception
         return self.ch,self.rabconn
 
     def callback(self,ch, method, props, body):
         LOGGER.info('Start callback at message')
-        print('DECODE____')
         message = json.loads(body.decode("utf-8"))
-        #message = Struct(**body.decode("utf-8"))
         LOGGER.info('Message get %s' % message)
-        print(message)
-        print(message['to'],message['From'],message['body'])
+
         # SEND EMAIL OFC
         try:
             self.smtp,self.result = self.smtp.send_email(Email(
             to=message['to'],
             From=message['From'],
-            body=message['body'],
+            body=Template(message['body']).render(message),
             subject=message['subject']))
         except Exception as e:
             LOGGER.error(e)
             raise Exception
         # END SEND EMAIL OFC
-        LOGGER.info('Success sending message')
 
+        LOGGER.info('Success sending message')
         LOGGER.info('Result %s' % self.result)
         if self.result == {}:
-            response = """{'%s': (250,'Success sending')}""" % message['to']
+            response = {
+                message['to']:(250,'Success sending')
+            }
         else:
             response = self.result
         LOGGER.info('Message send %s' % message)
         ch.basic_publish(exchange='',
                 routing_key=props.reply_to,
                 properties=pika.BasicProperties(correlation_id = props.correlation_id),
-                body=str(response))
+                body=json.dumps(response))
         ch.basic_ack(delivery_tag=method.delivery_tag)
 
     def reconnect(self):
