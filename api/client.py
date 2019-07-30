@@ -62,4 +62,4 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
     LOGGER.info('Start sending')
     email_rpc = EmailRpcClient("""amqp://guest:guest@localhost:5672/%2f""",'test')
-    LOGGER.info(email_rpc.sendTemplate(text=str('<p>Privet from RabbitMQ</p>'),to='Aleksey.A.Lazarev@rt.ru'),subject='Привет тема',template='./templates/template.html.j2')
+    LOGGER.info(email_rpc.sendTemplate(text=str('<p>Privet from RabbitMQ</p>'),to='xom4ek-1994@yande.ru'),subject='Привет тема',template='./templates/template.html.j2')

@@ -3,7 +3,7 @@ import pika
 import logging
 import time
 import json
-from email_class import cfg,Email,SMTP,Struct
+from email_class import cfg,Email,SMTPe,Struct
 LOGGER = logging.getLogger(__name__)
 from jinja2 import Template
 
@@ -13,7 +13,7 @@ class Consumer(object):
         self.queue=queue
         self.try_cnt=0
         self.try_max=try_max
-        self.smtp=SMTP(**cfg.smtp)
+        self.smtp=SMTPe(**cfg.smtp)
         self.smtp.create_conn()
 
 
