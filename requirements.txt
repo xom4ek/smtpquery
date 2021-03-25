@@ -4,5 +4,5 @@ itsdangerous==1.1.0
 Jinja2==2.10.1
 MarkupSafe==1.1.1
 pika==1.1.0
-PyYAML==5.1.1
+PyYAML==5.4
 Werkzeug==0.15.5
